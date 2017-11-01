@@ -27,11 +27,13 @@ RUN apt-get update -qq \
     python-numpy \
     python-scipy \
     python-skimage \
+    #requirement for matplotlib
+    python-tk \
     # requirements for opencv
     libsm6 \
     libxrender1 \
     libfontconfig1 \
-    libXext6 \
+    libxext6
 
 
 ## CLEAN
@@ -64,12 +66,12 @@ RUN pip --no-cache-dir install \
 RUN pip install keras
 
 
-#RUN groupadd --gid 1000 recod && \
-#    useradd --create-home --shell /bin/bash --uid 10037 --gid 1000 piresramon && \
-#    echo "piresramon:piresramon" | chpasswd && \
-#    adduser piresramon sudo && \
-#    su -l piresramon
+RUN groupadd --gid 1000 recod && \
+    useradd --create-home --shell /bin/bash --uid 10032 --gid 1000 rpadilha && \
+    echo "rpadilha:rpadilha" | chpasswd && \
+    adduser rpadilha sudo && \
+    su -l rpadilha
 
-#USER piresramon
+USER rpadilha
 
 WORKDIR /home/rpadilha
