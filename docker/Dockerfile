@@ -26,20 +26,12 @@ RUN apt-get update -qq \
     libopenblas-base \
     python-numpy \
     python-scipy \
-    python-skimage
-
-
-# opencv
-RUN apt-get install -y -q libavformat-dev libavcodec-dev libavfilter-dev libswscale-dev
-
-RUN apt-get install -y -q libjpeg-dev libpng-dev libtiff-dev libjasper-dev zlib1g-dev libopenexr-dev libxine-dev libeigen3-dev libtbb-dev
-
-ADD build_opencv.sh /build_opencv.sh
-
-RUN /bin/sh /build_opencv.sh
-
-RUN rm -rf /build_opencv.sh
-
+    python-skimage \
+    # requirements for opencv
+    libsm6 \
+    libxrender1 \
+    libfontconfig1 \
+    libXext6 \
 
 
 ## CLEAN
@@ -49,8 +41,6 @@ RUN apt-get clean \
 # dump package lists
 RUN dpkg-query -l > /dpkg-query-l.txt \
  && pip2 freeze > /pip2-freeze.txt
-
-
 
 
 RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
@@ -64,6 +54,7 @@ RUN pip --no-cache-dir install \
     h5py \
     pydot-ng \
     graphviz \
+    opencv-contrib-python \
     && \
     python -m ipykernel.kernelspec
 
