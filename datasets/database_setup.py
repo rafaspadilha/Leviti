@@ -102,6 +102,8 @@ def register(original, new, transform = True):
 def load_data(folder, min_obj, save):
     sub_f = sorted(os.listdir(folder))
 
+    print folder, "  " , sub_f
+
     total = 0
     model = None
 
@@ -214,14 +216,6 @@ def load_data(folder, min_obj, save):
     return True
 
 if __name__ == "__main__":
-    directories = []
-
-    for d in sorted(os.listdir(root)):
-        directories.append(os.path.join(root, d))
-
-    print directories
-    exit()
-
     for d in os.listdir(root):
         # ignore final result
         if d == OUTPUT:
@@ -234,7 +228,7 @@ if __name__ == "__main__":
             if not os.path.exists(new_dataset):
                 os.makedirs(new_dataset)
 
-            if not load_data(dataset, 100, new_dataset + '/'):
+            if not load_data(dataset, 10, new_dataset + '/'):
                 shutil.rmtree(new_dataset)
 
         except IOError as e:
