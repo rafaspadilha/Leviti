@@ -73,7 +73,7 @@ def register(original, new, transform = True):
             return img, None
 
         if transform and len(good) > MIN_MATCH_COUNT * 2:
-	        print "Transforming " + new
+            print "Transforming " + new
             src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1, 1, 2)
             dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1, 1, 2)
 
