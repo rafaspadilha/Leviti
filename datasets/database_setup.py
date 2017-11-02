@@ -58,7 +58,7 @@ def register(original, new, transform = True):
             if m.distance < 0.7 * n.distance:
                 good.append(m)
 
-        print "Number of good matches for " + new + ": ", len(good)
+        print "\n\nNumber of good matches for " + new + ": ", len(good)
 
 
         # is it useful for us?
@@ -88,19 +88,19 @@ def register(original, new, transform = True):
                 res = cv2.warpPerspective(img, M, (w, h), borderMode=cv2.BORDER_CONSTANT, borderValue=(255, 255, 255))
             else:
                 res = img
+
+            print "Drawing matches... " + new[:-4] + "_matches.jpg" 
+            draw_params = dict(matchColor = (0,255,0), # draw matches in green color
+                               singlePointColor = None,
+                               matchesMask = matchesMask, # draw only inliers
+                               flags = 2)
+
+            matches_img = cv2.drawMatches(original, kp1, gray, kp2, good, None, **draw_params)
+
         else:
             res = img
 
-	
-        print "Drawing matches... " + new[:-4] + "_matches.jpg" 
-        draw_params = dict(matchColor = (0,255,0), # draw matches in green color
-                           singlePointColor = None,
-                           matchesMask = matchesMask, # draw only inliers
-                           flags = 2)
-
-        matches_img = cv2.drawMatches(original, kp1, gray, kp2, good, None, **draw_params)
-
-        return res, matches_img
+	    return res, matches_img
 
     except IOError as e:
         print ('Could not read: ', img_f, ', skipping it!')
@@ -157,7 +157,7 @@ def load_data(folder, min_obj, save):
                 cv2.imwrite(save + '/' + img, data)
 
 
-                if matches_img not None:
+                if matches_img is not None:
                     cv2.imwrite(save + '/' + img[:-4] + "_matches" + img[-4:], matches_img)
 
             except IOError as e:
