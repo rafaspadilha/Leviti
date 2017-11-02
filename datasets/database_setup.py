@@ -19,7 +19,7 @@ root   = '/work/rpadilha/AMOS/'
 def register(original, new, transform = True):
     try:
         img = cv2.imread(new)
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        #gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 
         # Initiate SIFT detector
@@ -28,10 +28,10 @@ def register(original, new, transform = True):
         # find the keypoints and descriptors with SIFT
         kp1, des1 = sift.detectAndCompute(original, None)
 
-        if gray is None:
+        if img is None:
             return None
         else:
-            kp2, des2 = sift.detectAndCompute(gray, None)
+            kp2, des2 = sift.detectAndCompute(img, None)
 
         FLANN_INDEX_KDTREE = 0
         index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
@@ -53,7 +53,7 @@ def register(original, new, transform = True):
             if m.distance < 0.7 * n.distance:
                 good.append(m)
 
-        print "Number of good matches: ", len(good)
+        print "Number of good matches for " + new + ": ", len(good)
 
 
         # is it useful for us?
@@ -68,6 +68,7 @@ def register(original, new, transform = True):
             return img
 
         if transform and len(good) > MIN_MATCH_COUNT * 2:
+	    print "Transforming " + new
             src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1, 1, 2)
             dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1, 1, 2)
 
@@ -85,6 +86,8 @@ def register(original, new, transform = True):
         else:
             res = img
 
+	
+	print "Drawing matches... " + new[:-4] + "_matches.jpg" 
         draw_params = dict(matchColor = (0,255,0), # draw matches in green color
                            singlePointColor = None,
                            matchesMask = matchesMask, # draw only inliers
@@ -92,7 +95,7 @@ def register(original, new, transform = True):
 
         img3 = cv2.drawMatches(original, kp1, img, kp2, good, None, **draw_params)
 
-        cv2.imwrite(new + "_matches", img3)
+        cv2.imwrite(new[:-4] + "_matches.jpg", img3)
 
         return res
 
@@ -119,7 +122,7 @@ def load_data(folder, min_obj, save):
         if model is None:
             m     = sub_n + '/' + img_f[0] # first image, taken as a model
             model = cv2.imread(m)
-            model = cv2.cvtColor(model, cv2.COLOR_BGR2GRAY)
+            #model = cv2.cvtColor(model, cv2.COLOR_BGR2GRAY)
 
             # get specs of image
             h = model.shape[0]
