@@ -29,12 +29,12 @@ def register(original, new, transform = True):
         if img is None:
             return None, None
         else:
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            gray = cv2.equalizeHist(gray)
+            #gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            #gray = cv2.equalizeHist(gray)
 
-            #gray = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
-            #gray[:,:,0] = cv2.equalizeHist(gray[:,:,0])
-            #gray = cv2.cvtColor(gray, cv2.COLOR_YUV2BGR)
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
+            gray[:,:,0] = cv2.equalizeHist(gray[:,:,0])
+            gray = cv2.cvtColor(gray, cv2.COLOR_YUV2BGR)
 
             kp2, des2 = sift.detectAndCompute(gray, None)
 
@@ -82,7 +82,7 @@ def register(original, new, transform = True):
             if mask is not None:
                 matchesMask = mask.ravel().tolist()
 
-            h, w = original.shape
+            h, w, _ = original.shape
 
             if M is not None and M.shape == (3, 3):
                 res = cv2.warpPerspective(img, M, (w, h), borderMode=cv2.BORDER_CONSTANT, borderValue=(255, 255, 255))
@@ -124,12 +124,12 @@ def load_data(folder, min_obj, save):
         if model is None:
             m     = sub_n + '/' + img_f[0] # first image, taken as a model
             model = cv2.imread(m)
-            model = cv2.cvtColor(model, cv2.COLOR_BGR2GRAY)
-            model = cv2.equalizeHist(model)
+            #model = cv2.cvtColor(model, cv2.COLOR_BGR2GRAY)
+            #model = cv2.equalizeHist(model)
 
-            #model = cv2.cvtColor(model, cv2.COLOR_BGR2YUV)
-            #model[:,:,0] = cv2.equalizeHist(model[:,:,0])
-            #model = cv2.cvtColor(model, cv2.COLOR_YUV2BGR)
+            model = cv2.cvtColor(model, cv2.COLOR_BGR2YUV)
+            model[:,:,0] = cv2.equalizeHist(model[:,:,0])
+            model = cv2.cvtColor(model, cv2.COLOR_YUV2BGR)
 
             # get specs of image
             h = model.shape[0]
