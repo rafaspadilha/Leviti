@@ -110,6 +110,8 @@ def load_data(folder, min_obj, save):
     for s in sub_f:
         sub_n = folder + '/' + s
         img_f = os.listdir(sub_n)
+	
+	print "List of Images:\n", img_f
 
         # initialize!
         if model is None:
@@ -119,6 +121,9 @@ def load_data(folder, min_obj, save):
             # get specs of image
             h = model.shape[0]
             w = model.shape[1]
+
+	print "Model used: " + m
+	print "Model h,w: ", h, " ", w
 
         for img in img_f:
             file =  sub_n + '/' + img
@@ -137,7 +142,7 @@ def load_data(folder, min_obj, save):
                 # check specs of image
                 if h != data.shape[0] or w != data.shape[1]:
                     continue
-
+		"""
                 # crop conners to image default size
                 for i in range(min(h/IMG_SIZE + 1, 2)):
                     for j in range(min(w/IMG_SIZE + 1, 2)):
@@ -201,7 +206,9 @@ def load_data(folder, min_obj, save):
                     cv2.imwrite(label, cropped)
 
                     num_img += 1
-
+		"""
+		cv2.imwrite(save + '/' + img, data)
+		
             except IOError as e:
                 print ('Could not read: ', img_f, ', skipping it!')
 
@@ -228,7 +235,7 @@ if __name__ == "__main__":
             if not os.path.exists(new_dataset):
                 os.makedirs(new_dataset)
 
-            if not load_data(dataset, 10, new_dataset + '/'):
+            if not load_data(dataset, 2, new_dataset + '/'):
                 shutil.rmtree(new_dataset)
 
         except IOError as e:
