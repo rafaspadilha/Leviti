@@ -101,7 +101,8 @@ def register(original, new, transform = True):
             res = img
             matches_img = None
 
-	    return res, matches_img
+        print res, matches_img
+        return res, matches_img
 
     except IOError as e:
         print ('Could not read: ', img_f, ', skipping it!')
@@ -144,7 +145,7 @@ def load_data(folder, min_obj, save):
             try:
                 # get full image, following registration
                 data, matches_img = register(model, file, True)
-
+                print data, matches_img
                 # if registration went bad, simply ignore it
                 if data is None:
                     continue
