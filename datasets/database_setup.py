@@ -101,7 +101,6 @@ def register(original, new, transform = True):
             res = img
             matches_img = None
 
-        print res, matches_img
         return res, matches_img
 
     except IOError as e:
@@ -145,7 +144,7 @@ def load_data(folder, min_obj, save):
             try:
                 # get full image, following registration
                 data, matches_img = register(model, file, True)
-                print data, matches_img
+
                 # if registration went bad, simply ignore it
                 if data is None:
                     continue
