@@ -19,9 +19,7 @@ root   = '/work/rpadilha/AMOS/'
 def register(original, new, transform = True):
     try:
         img = cv2.imread(new)
-        #gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-
+        
         # Initiate SIFT detector
         sift = cv2.xfeatures2d.SIFT_create()
 
@@ -29,9 +27,16 @@ def register(original, new, transform = True):
         kp1, des1 = sift.detectAndCompute(original, None)
 
         if img is None:
-            return None
+            return None, None
         else:
-            kp2, des2 = sift.detectAndCompute(img, None)
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            gray = cv2.equalizeHist(gray)
+
+            #gray = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
+            #gray[:,:,0] = cv2.equalizeHist(gray[:,:,0])
+            #gray = cv2.cvtColor(gray, cv2.COLOR_YUV2BGR)
+
+            kp2, des2 = sift.detectAndCompute(gray, None)
 
         FLANN_INDEX_KDTREE = 0
         index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
@@ -45,7 +50,7 @@ def register(original, new, transform = True):
             matches = flann.knnMatch(np.asarray(des1, np.float32), \
                                      np.asarray(des2, np.float32), k=2)
         else:
-            return None
+            return None, None
 
         # store all the good matches as per Lowe's ratio test.
         good = []
@@ -61,11 +66,11 @@ def register(original, new, transform = True):
             print "Images are not sufficiently alike - %d/%d" % (len(good), MIN_MATCH_COUNT)
             matchesMask = None
 
-            return None
+            return None, None
 
         if len(good) > MIN_MATCH_COUNT and len(good) < MIN_MATCH_COUNT * 2:
             print "matches > MIN and matches < 2* MIN"
-            return img
+            return img, None
 
         if transform and len(good) > MIN_MATCH_COUNT * 2:
 	    print "Transforming " + new
@@ -77,7 +82,7 @@ def register(original, new, transform = True):
             if mask is not None:
                 matchesMask = mask.ravel().tolist()
 
-            h, w, _ = original.shape
+            h, w = original.shape
 
             if M is not None and M.shape == (3, 3):
                 res = cv2.warpPerspective(img, M, (w, h), borderMode=cv2.BORDER_CONSTANT, borderValue=(255, 255, 255))
@@ -87,22 +92,20 @@ def register(original, new, transform = True):
             res = img
 
 	
-	print "Drawing matches... " + new[:-4] + "_matches.jpg" 
+        print "Drawing matches... " + new[:-4] + "_matches.jpg" 
         draw_params = dict(matchColor = (0,255,0), # draw matches in green color
                            singlePointColor = None,
                            matchesMask = matchesMask, # draw only inliers
                            flags = 2)
 
-        img3 = cv2.drawMatches(original, kp1, img, kp2, good, None, **draw_params)
+        matches_img = cv2.drawMatches(original, kp1, gray, kp2, good, None, **draw_params)
 
-        cv2.imwrite(new[:-4] + "_matches.jpg", img3)
-
-        return res
+        return res, matches_img
 
     except IOError as e:
         print ('Could not read: ', img_f, ', skipping it!')
 
-        return None
+        return None, None
 
 def load_data(folder, min_obj, save):
     sub_f = sorted(os.listdir(folder))
@@ -115,41 +118,48 @@ def load_data(folder, min_obj, save):
     for s in sub_f:
         sub_n = folder + '/' + s
         img_f = os.listdir(sub_n)
-	
-	print "List of Images:\n", img_f
 
         # initialize!
         if model is None:
             m     = sub_n + '/' + img_f[0] # first image, taken as a model
             model = cv2.imread(m)
-            #model = cv2.cvtColor(model, cv2.COLOR_BGR2GRAY)
+            model = cv2.cvtColor(model, cv2.COLOR_BGR2GRAY)
+            model = cv2.equalizeHist(model)
+
+            #model = cv2.cvtColor(model, cv2.COLOR_BGR2YUV)
+            #model[:,:,0] = cv2.equalizeHist(model[:,:,0])
+            #model = cv2.cvtColor(model, cv2.COLOR_YUV2BGR)
 
             # get specs of image
             h = model.shape[0]
             w = model.shape[1]
 
-	print "Model used: " + m
-	print "Model h,w: ", h, " ", w
+    	print "Model used: " + m
+    	print "Model h,w: ", h, " ", w
 
         for img in img_f[:4]:
             file =  sub_n + '/' + img
 
             try:
                 # get full image, following registration
-                data = register(model, file, True)
+                data, matches_img = register(model, file, True)
 
                 # if registration went bad, simply ignore it
                 if data is None:
                     continue
 
                 total  += 1
-                num_img = 0 # counter
 
                 # check specs of image
                 if h != data.shape[0] or w != data.shape[1]:
                     continue
 
                 cv2.imwrite(save + '/' + img, data)
+
+
+                if matches_img not None:
+                    cv2.imwrite(save + '/' + img[:-4] + "_matches" + img[-4:], matches_img)
+
             except IOError as e:
                 print ('Could not read: ', img_f, ', skipping it!')
 
